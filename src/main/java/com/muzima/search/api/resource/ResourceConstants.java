@@ -21,21 +21,17 @@ import java.util.List;
 
 public class ResourceConstants {
 
-    public static final String RESOURCE_NAME = "resource.name";
+    public static final String RESOURCE_NAME = "$['resource.name']";
 
-    public static final String RESOURCE_SEARCHABLE = "resource.object";
+    public static final String ROOT_NODE = "$['node.root']";
 
-    public static final String RESOURCE_ROOT_NODE = "node.root";
+    public static final String SEARCHABLE_CLASS = "$['resource.object']";
 
-    public static final String RESOURCE_UNIQUE_FIELD = "field.unique";
+    public static final String ALGORITHM_CLASS = "$['algorithm.class']";
 
-    public static final String RESOURCE_ALGORITHM_CLASS = "algorithm.class";
+    public static final String RESOLVER_CLASS = "$['resolver.class']";
 
-    public static final String RESOURCE_URI_RESOLVER_CLASS = "resolver.class";
+    public static final String UNIQUE_FIELD = "$['field.unique']";
 
-    public static final List<String> NON_SEARCHABLE_FIELDS = Arrays.asList(RESOURCE_NAME, RESOURCE_SEARCHABLE,
-            RESOURCE_ROOT_NODE, RESOURCE_UNIQUE_FIELD, RESOURCE_ALGORITHM_CLASS, RESOURCE_URI_RESOLVER_CLASS);
-
-    public static final List<String> MANDATORY_FIELDS = Arrays.asList(RESOURCE_NAME, RESOURCE_SEARCHABLE,
-            RESOURCE_ROOT_NODE, RESOURCE_ALGORITHM_CLASS, RESOURCE_URI_RESOLVER_CLASS);
+    public static final String SEARCHABLE_FIELD = "$['field.searchable']";
 }

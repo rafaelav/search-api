@@ -18,17 +18,15 @@ package com.muzima.search.api.context;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.jayway.jsonpath.JsonPath;
 import com.muzima.search.api.exception.ServiceException;
 import com.muzima.search.api.internal.file.ResourceFileFilter;
 import com.muzima.search.api.model.object.Searchable;
 import com.muzima.search.api.model.resolver.Resolver;
 import com.muzima.search.api.model.serialization.Algorithm;
-import com.muzima.search.api.registry.DefaultRegistry;
-import com.muzima.search.api.registry.Registry;
 import com.muzima.search.api.resource.ObjectResource;
 import com.muzima.search.api.resource.Resource;
 import com.muzima.search.api.resource.ResourceConstants;
-import com.muzima.search.api.util.ResourceUtil;
 import com.muzima.search.api.util.StringUtil;
 
 import java.io.File;
@@ -45,67 +43,50 @@ import java.util.Map;
 @Singleton
 public final class ServiceContext {
 
-    private Registry<String, Searchable> objectRegistry;
-
-    private Registry<String, Algorithm> algorithmRegistry;
-
-    private Registry<String, Resolver> resolverRegistry;
-
     @Inject
-    private Registry<String, Resource> resourceRegistry;
+    private Map<String, Resource> resourceRegistry;
 
-    protected ServiceContext() {
-        objectRegistry = new DefaultRegistry<String, Searchable>();
-        algorithmRegistry = new DefaultRegistry<String, Algorithm>();
-        resolverRegistry = new DefaultRegistry<String, Resolver>();
-    }
-
-    private Registry<String, Searchable> getObjectRegistry() {
-        return objectRegistry;
-    }
-
-    private Registry<String, Algorithm> getAlgorithmRegistry() {
-        return algorithmRegistry;
-    }
-
-    private Registry<String, Resolver> getResolverRegistry() {
-        return resolverRegistry;
-    }
-
-    private Registry<String, Resource> getResourceRegistry() {
+    private Map<String, Resource> getResourceRegistry() {
         return resourceRegistry;
     }
 
     /**
      * Register a new resource object.
      *
+     * When registering resources which will be created from file in the filesystem or the project, make sure that the
+     * classes inside the resources (searchable object, algorithm or resolver) doesn't require injection from Guice.
+     * When any of the class inside the resource object will require injection, the client / user of the search-api
+     * must define their own way to create the resource object using Guice's injector and then use
+     * <code>registerResource(String, Resource)</code> to register the resource.
+     *
+     * Both <code>registerResources(File)</code> or <code>registerResource(InputStream)</code> are using standard Java
+     * class loading and class instantiation mechanism to create the classes required by the resource object.
+     *
      * @param name     the name of the resource (will be used to retrieve the resource later on).
      * @param resource the resource object.
      * @throws ServiceException when name or resource is invalid (null).
      */
-    protected void registerResource(final String name, final Resource resource) throws ServiceException {
+    public void registerResource(final String name, final Resource resource) throws ServiceException {
         if (StringUtil.isEmpty(name))
             throw new ServiceException("Trying to register resource without handle.");
 
         if (resource == null)
             throw new ServiceException("Trying to register invalid resource object.");
 
-        getResourceRegistry().putEntry(name, resource);
-    }
-
-    /**
-     * Register a new resource object for future use.
-     *
-     * @param resource the resource to be registered.
-     * @should register resource object.
-     * @should not register resource without resource name.
-     */
-    public void registerResource(final Resource resource) throws ServiceException {
-        registerResource(resource.getName(), resource);
+        getResourceRegistry().put(name, resource);
     }
 
     /**
      * Read the input file and then convert each file into resource object and register them.
+     *
+     * When registering resources which will be created from file in the filesystem or the project, make sure that the
+     * classes inside the resources (searchable object, algorithm or resolver) doesn't require injection from Guice.
+     * When any of the class inside the resource object will require injection, the client / user of the search-api
+     * must define their own way to create the resource object using Guice's injector and then use
+     * <code>registerResource(String, Resource)</code> to register the resource.
+     *
+     * Both <code>registerResources(File)</code> or <code>registerResource(InputStream)</code> are using standard Java
+     * class loading and class instantiation mechanism to create the classes required by the resource object.
      *
      * @param file the file (could be a directory too).
      * @throws IOException when the parser fail to read the configuration file.
@@ -129,66 +110,93 @@ public final class ServiceContext {
     /**
      * Read the input stream and then convert it into resource object and register them.
      *
+     * When registering resources which will be created from file in the filesystem or the project, make sure that the
+     * classes inside the resources (searchable object, algorithm or resolver) doesn't require injection from Guice.
+     * When any of the class inside the resource object will require injection, the client / user of the search-api
+     * must define their own way to create the resource object using Guice's injector and then use
+     * <code>registerResource(String, Resource)</code> to register the resource.
+     *
+     * Both <code>registerResources(File)</code> or <code>registerResource(InputStream)</code> are using standard Java
+     * class loading and class instantiation mechanism to create the classes required by the resource object.
+     *
      * @param inputStream the input stream to the configuration.
      * @throws IOException when the parser fail to read the configuration input stream.
      * @should create valid resource object based on the resource input stream.
      */
     public void registerResource(final InputStream inputStream) throws IOException, ServiceException {
-        registerResource(createResource(inputStream));
+        createResources(inputStream);
     }
 
     /**
-     * Internal method to convert the actual resource file into the resource object.
+     * Internal method to convert the actual resource input stream into the resource object.
      *
-     * @param inputStream the input stream to the configuration.
+     * @param inputStream the configuration's input stream.
+     * @throws IOException when the parser fail to read the configuration file
+     */
+    private void createResources(final InputStream inputStream) throws IOException {
+        try {
+            List<Object> configurations = JsonPath.read(inputStream, "$['configurations']");
+            for (Object configuration : configurations) {
+                Resource resource = createResource(configuration.toString());
+                registerResource(resource.getName(), resource);
+            }
+        } catch (Exception e) {
+            throw new IOException("Unable to register one or two configuration!", e);
+        }
+    }
+
+    /**
+     * Internal method to convert the actual resource string into the resource object.
+     *
+     * @param configuration the configuration.
      * @return the resource object
      * @throws IOException when the parser fail to read the configuration file
      */
-    private Resource createResource(final InputStream inputStream) throws IOException, ServiceException {
+    private Resource createResource(final String configuration) throws Exception {
 
-        // TODO: see this gist to prevent re-reading the same resource file if it's already registered
-        // https://gist.github.com/3998818
+        String name = JsonPath.read(configuration, ResourceConstants.RESOURCE_NAME);
+        String root = JsonPath.read(configuration, ResourceConstants.ROOT_NODE);
+        if (StringUtil.isEmpty(root)) {
+            throw new ServiceException("Unable to create resource because of missing root node.");
+        }
 
-        Registry<String, String> properties = ResourceUtil.readConfiguration(inputStream);
-        String resourceName = properties.getEntryValue(ResourceConstants.RESOURCE_NAME);
+        String searchableName = JsonPath.read(configuration, ResourceConstants.SEARCHABLE_CLASS);
+        if (StringUtil.isEmpty(root)) {
+            throw new ServiceException("Unable to create resource because of missing searchable node.");
+        }
+        Class searchableClass = Class.forName(searchableName);
+        Searchable searchable = (Searchable) searchableClass.newInstance();
 
-        String rootNode = properties.getEntryValue(ResourceConstants.RESOURCE_ROOT_NODE);
-        if (StringUtil.isEmpty(rootNode))
-            throw new ServiceException("Unable to create resource because of missing root node definition.");
+        String algorithmName = JsonPath.read(configuration, ResourceConstants.ALGORITHM_CLASS);
+        if (StringUtil.isEmpty(root)) {
+            throw new ServiceException("Unable to create resource because of missing algorithm node.");
+        }
+        Class algorithmClass = Class.forName(algorithmName);
+        Algorithm algorithm = (Algorithm) algorithmClass.newInstance();
 
-        String objectClassKey = properties.getEntryValue(ResourceConstants.RESOURCE_SEARCHABLE);
-        Searchable searchable = getObjectRegistry().getEntryValue(objectClassKey);
-        if (searchable == null)
-            throw new ServiceException("Unable to create resource because of missing rest assured object. " +
-                    "Expecting object of type: " + objectClassKey);
+        String resolverName = JsonPath.read(configuration, ResourceConstants.RESOLVER_CLASS);
+        if (StringUtil.isEmpty(root)) {
+            throw new ServiceException("Unable to create resource because of missing resolver node.");
+        }
+        Class resolverClass = Class.forName(resolverName);
+        Resolver resolver = (Resolver) resolverClass.newInstance();
 
-        String algorithmKey = properties.getEntryValue(ResourceConstants.RESOURCE_ALGORITHM_CLASS);
-        Algorithm algorithm = getAlgorithmRegistry().getEntryValue(algorithmKey);
-        if (algorithm == null)
-            throw new ServiceException("Unable to create resource because of missing algorithm object. " +
-                    "Expecting algorithm of type: " + algorithmKey);
-
-        String resolverKey = properties.getEntryValue(ResourceConstants.RESOURCE_URI_RESOLVER_CLASS);
-        Resolver resolver = getResolverRegistry().getEntryValue(resolverKey);
-        if (resolver == null)
-            throw new ServiceException("Unable to create resource because of missing resolver object. " +
-                    "Expecting resolver of type: " + resolverKey);
-
-        Resource resource = new ObjectResource(resourceName, rootNode, searchable.getClass(), algorithm, resolver);
-
-        Object uniqueField = properties.getEntryValue(ResourceConstants.RESOURCE_UNIQUE_FIELD);
         List<String> uniqueFields = new ArrayList<String>();
-        if (uniqueField != null)
-            uniqueFields = Arrays.asList(StringUtil.split(uniqueField.toString(), ","));
-
-        List<String> ignoredField = ResourceConstants.NON_SEARCHABLE_FIELDS;
-        Map<String, String> entries = properties.getEntries();
-        for (String fieldName : entries.keySet()) {
-            if (!ignoredField.contains(fieldName)) {
+        String uniqueField = JsonPath.read(configuration, ResourceConstants.UNIQUE_FIELD);
+        if (uniqueField != null) {
+            uniqueFields = Arrays.asList(StringUtil.split(uniqueField, ","));
+        }
+        Resource resource = new ObjectResource(name, root, searchable.getClass(), algorithm, resolver);
+        Object searchableFields = JsonPath.read(configuration, ResourceConstants.SEARCHABLE_FIELD);
+        if (searchableFields instanceof Map) {
+            Map map = (Map) searchableFields;
+            for (Object fieldName : map.keySet()) {
                 Boolean unique = Boolean.FALSE;
-                if (uniqueFields.contains(fieldName))
+                if (uniqueFields.contains(fieldName.toString())) {
                     unique = Boolean.TRUE;
-                resource.addFieldDefinition(fieldName, entries.get(fieldName), unique);
+                }
+                String expression = map.get(fieldName).toString();
+                resource.addFieldDefinition(fieldName.toString(), expression, unique);
             }
         }
         return resource;
@@ -201,7 +209,7 @@ public final class ServiceContext {
      * @should return all registered resource object.
      */
     public Collection<Resource> getResources() {
-        return getResourceRegistry().getEntries().values();
+        return getResourceRegistry().values();
     }
 
     /**
@@ -212,7 +220,7 @@ public final class ServiceContext {
      * @should return resource object based on the name of the resource.
      */
     public Resource getResource(final String name) {
-        return getResourceRegistry().getEntryValue(name);
+        return getResourceRegistry().get(name);
     }
 
     /**
@@ -223,78 +231,6 @@ public final class ServiceContext {
      * @should return removed resource object
      */
     public Resource removeResource(final Resource resource) {
-        return getResourceRegistry().removeEntry(resource.getName());
-    }
-
-    /**
-     * Register domain object which can be used to create a new resource object.
-     *
-     * @param searchable the domain object.
-     * @should register domain object using the class name.
-     */
-    public void registerSearchable(final Searchable searchable) throws ServiceException {
-        if (searchable == null)
-            throw new ServiceException("Trying to register invalid domain object.");
-
-        getObjectRegistry().putEntry(searchable.getClass().getName(), searchable);
-    }
-
-    public Searchable getSearchable(final String name) {
-        return getObjectRegistry().getEntryValue(name);
-    }
-
-    public Searchable removeSearchable(final Searchable searchable) {
-        return getObjectRegistry().removeEntry(searchable.getClass().getName());
-    }
-
-    public boolean containsSearchable(final Searchable searchable) {
-        return getObjectRegistry().hasEntry(searchable.getClass().getName());
-    }
-
-    /**
-     * Register algorithm which can be used to create a new resource object.
-     *
-     * @param algorithm the algorithm.
-     * @should register algorithm using the class name.
-     */
-    public void registerAlgorithm(final Algorithm algorithm) throws ServiceException {
-        if (algorithm == null)
-            throw new ServiceException("Trying to register invalid algorithm object.");
-
-        getAlgorithmRegistry().putEntry(algorithm.getClass().getName(), algorithm);
-    }
-
-    public Algorithm getAlgorithm(final String name) {
-        return getAlgorithmRegistry().getEntryValue(name);
-    }
-
-    public Algorithm removeAlgorithm(final Algorithm algorithm) {
-        return getAlgorithmRegistry().removeEntry(algorithm.getClass().getName());
-    }
-
-    public boolean containsAlgorithm(final Algorithm algorithm) {
-        return getAlgorithmRegistry().hasEntry(algorithm.getClass().getName());
-    }
-
-    /**
-     * Register resolver which can be used to create a new resource object.
-     *
-     * @param resolver the resolver
-     * @should register resolver using the class name.
-     */
-    public void registerResolver(final Resolver resolver) {
-        getResolverRegistry().putEntry(resolver.getClass().getName(), resolver);
-    }
-
-    public Resolver getResolver(final String name) {
-        return getResolverRegistry().getEntryValue(name);
-    }
-
-    public Resolver removeResolver(final Resolver resolver) {
-        return getResolverRegistry().removeEntry(resolver.getClass().getName());
-    }
-
-    public boolean containsResolver(final Resolver resolver) {
-        return getResolverRegistry().hasEntry(resolver.getClass().getName());
+        return getResourceRegistry().remove(resource.getName());
     }
 }

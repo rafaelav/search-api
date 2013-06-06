@@ -18,22 +18,17 @@ package com.muzima.search.api;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.jayway.jsonpath.JsonPath;
 import com.muzima.search.api.context.ServiceContext;
 import com.muzima.search.api.exception.ServiceException;
 import com.muzima.search.api.internal.file.ResourceFileFilter;
-import com.muzima.search.api.model.object.Searchable;
 import com.muzima.search.api.model.resolver.Resolver;
 import com.muzima.search.api.model.serialization.Algorithm;
 import com.muzima.search.api.module.JUnitModule;
 import com.muzima.search.api.module.SearchModule;
-import com.muzima.search.api.registry.Registry;
 import com.muzima.search.api.resource.Resource;
 import com.muzima.search.api.resource.ResourceConstants;
 import com.muzima.search.api.resource.SearchableField;
-import com.muzima.search.api.sample.algorithm.PatientAlgorithm;
-import com.muzima.search.api.sample.domain.Patient;
-import com.muzima.search.api.sample.resolver.PatientResolver;
-import com.muzima.search.api.util.ResourceUtil;
 import com.muzima.search.api.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,17 +48,11 @@ public class ServiceContextTest {
     public void prepare() throws Exception {
         Injector injector = Guice.createInjector(new SearchModule(), new JUnitModule());
         serviceContext = injector.getInstance(ServiceContext.class);
-        // register algorithms classes for the testing
-        serviceContext.registerAlgorithm(new PatientAlgorithm());
-        // register resolver classes for the testing
-        serviceContext.registerResolver(new PatientResolver());
-        // register domain object classes for the testing
-        serviceContext.registerSearchable(new Patient());
     }
 
     /**
      * @verifies register resource object.
-     * @see ServiceContext#registerResource(com.muzima.search.api.resource.Resource)
+     * @see ServiceContext#registerResource(String, com.muzima.search.api.resource.Resource)
      */
     @Test
     public void registerResource_shouldRegisterResourceObject() throws Exception {
@@ -72,7 +61,7 @@ public class ServiceContextTest {
         Resource resource = Mockito.mock(Resource.class);
         Mockito.when(resource.getName()).thenReturn(resourceName);
 
-        serviceContext.registerResource(resource);
+        serviceContext.registerResource(resource.getName(), resource);
         // check the registration process
         Assert.assertTrue(serviceContext.getResources().size() > 0);
 
@@ -83,7 +72,7 @@ public class ServiceContextTest {
 
     /**
      * @verifies not register resource without resource name.
-     * @see ServiceContext#registerResource(com.muzima.search.api.resource.Resource)
+     * @see ServiceContext#registerResource(String, com.muzima.search.api.resource.Resource)
      */
     @Test(expected = ServiceException.class)
     public void registerResource_shouldNotRegisterResourceWithoutResourceName() throws Exception {
@@ -93,7 +82,7 @@ public class ServiceContextTest {
         Mockito.when(resource.getName()).thenReturn(resourceName);
 
         // should throw exception here
-        serviceContext.registerResource(resource);
+        serviceContext.registerResource(resourceName, resource);
     }
 
     /**
@@ -125,57 +114,20 @@ public class ServiceContextTest {
 
         File[] files = resourceFile.listFiles(new ResourceFileFilter());
         for (File file : files) {
-            Registry<String, String> stringRegistry = ResourceUtil.readConfiguration(file);
-            String resourceName = stringRegistry.getEntryValue(ResourceConstants.RESOURCE_NAME);
-            Resource registeredResource = serviceContext.getResource(resourceName);
-            Assert.assertNotNull(registeredResource);
-            Assert.assertEquals(stringRegistry.getEntryValue(ResourceConstants.RESOURCE_ROOT_NODE),
-                    registeredResource.getRootNode());
-            Assert.assertTrue(Algorithm.class.isAssignableFrom(registeredResource.getAlgorithm().getClass()));
-            Assert.assertTrue(Resolver.class.isAssignableFrom(registeredResource.getResolver().getClass()));
+            List<Object> configurationObjects = JsonPath.read(file, "$['configurations']");
+            for (Object configurationObject : configurationObjects) {
+                String resourceName = JsonPath.read(configurationObject, ResourceConstants.RESOURCE_NAME);
+                Resource registeredResource = serviceContext.getResource(resourceName);
+                Assert.assertNotNull(registeredResource);
+                Assert.assertTrue(Algorithm.class.isAssignableFrom(registeredResource.getAlgorithm().getClass()));
+                Assert.assertTrue(Resolver.class.isAssignableFrom(registeredResource.getResolver().getClass()));
 
-            Assert.assertEquals(stringRegistry.getEntries().size() - ResourceConstants.NON_SEARCHABLE_FIELDS.size(),
-                    registeredResource.getSearchableFields().size());
-
-            String uniqueKey = stringRegistry.getEntryValue(ResourceConstants.RESOURCE_UNIQUE_FIELD);
-            List<String> uniqueKeyFields = Arrays.asList(StringUtil.split(uniqueKey, ","));
-            for (SearchableField searchableField : registeredResource.getSearchableFields()) {
-                if (uniqueKeyFields.contains(searchableField.getName()))
-                    Assert.assertEquals(Boolean.TRUE, searchableField.isUnique());
-            }
-        }
-    }
-
-    /**
-     * @verifies create valid resource object based on the resource file.
-     * @see ServiceContext#registerResources(java.io.File)
-     */
-    @Test
-    public void registerResources_shouldCreateValidResourceObjectBasedOnTheResourceFile() throws Exception {
-
-        URL url = ServiceContextTest.class.getResource("sample/j2l");
-        File resourceFile = new File(url.getPath());
-        serviceContext.registerResources(resourceFile);
-
-        File[] files = resourceFile.listFiles(new ResourceFileFilter());
-        for (File file : files) {
-            Registry<String, String> stringRegistry = ResourceUtil.readConfiguration(file);
-            String resourceName = stringRegistry.getEntryValue(ResourceConstants.RESOURCE_NAME);
-            Resource registeredResource = serviceContext.getResource(resourceName);
-            Assert.assertNotNull(registeredResource);
-            Assert.assertEquals(stringRegistry.getEntryValue(ResourceConstants.RESOURCE_ROOT_NODE),
-                    registeredResource.getRootNode());
-            Assert.assertTrue(Algorithm.class.isAssignableFrom(registeredResource.getAlgorithm().getClass()));
-            Assert.assertTrue(Resolver.class.isAssignableFrom(registeredResource.getResolver().getClass()));
-
-            Assert.assertEquals(stringRegistry.getEntries().size() - ResourceConstants.NON_SEARCHABLE_FIELDS.size(),
-                    registeredResource.getSearchableFields().size());
-
-            String uniqueKey = stringRegistry.getEntryValue(ResourceConstants.RESOURCE_UNIQUE_FIELD);
-            List<String> uniqueKeyFields = Arrays.asList(StringUtil.split(uniqueKey, ","));
-            for (SearchableField searchableField : registeredResource.getSearchableFields()) {
-                if (uniqueKeyFields.contains(searchableField.getName()))
-                    Assert.assertEquals(Boolean.TRUE, searchableField.isUnique());
+                String uniqueField = JsonPath.read(configurationObject, ResourceConstants.UNIQUE_FIELD);
+                List<String> uniqueKeyFields = Arrays.asList(StringUtil.split(uniqueField, ","));
+                for (SearchableField searchableField : registeredResource.getSearchableFields()) {
+                    if (uniqueKeyFields.contains(searchableField.getName()))
+                        Assert.assertEquals(Boolean.TRUE, searchableField.isUnique());
+                }
             }
         }
     }
@@ -194,10 +146,12 @@ public class ServiceContextTest {
         File[] files = resourceFile.listFiles(new ResourceFileFilter());
         Assert.assertNotNull(files);
         for (File file : files) {
-            Registry<String, String> stringRegistry = ResourceUtil.readConfiguration(file);
-            String resourceName = stringRegistry.getEntryValue(ResourceConstants.RESOURCE_NAME);
-            Resource registeredResource = serviceContext.getResource(resourceName);
-            Assert.assertNotNull(registeredResource);
+            List<Object> configurationObjects = JsonPath.read(file, "$['configurations']");
+            for (Object configurationObject : configurationObjects) {
+                String resourceName = JsonPath.read(configurationObject, ResourceConstants.RESOURCE_NAME);
+                Resource registeredResource = serviceContext.getResource(resourceName);
+                Assert.assertNotNull(registeredResource);
+            }
         }
     }
 
@@ -215,10 +169,12 @@ public class ServiceContextTest {
         File[] files = resourceFile.listFiles(new ResourceFileFilter());
         Assert.assertNotNull(files);
         for (File file : files) {
-            Registry<String, String> stringRegistry = ResourceUtil.readConfiguration(file);
-            String resourceName = stringRegistry.getEntryValue(ResourceConstants.RESOURCE_NAME);
-            Resource registeredResource = serviceContext.getResource(resourceName);
-            Assert.assertNotNull(registeredResource);
+            List<Object> configurationObjects = JsonPath.read(file, "$['configurations']");
+            for (Object configurationObject : configurationObjects) {
+                String resourceName = JsonPath.read(configurationObject, ResourceConstants.RESOURCE_NAME);
+                Resource registeredResource = serviceContext.getResource(resourceName);
+                Assert.assertNotNull(registeredResource);
+            }
         }
     }
 
@@ -239,41 +195,5 @@ public class ServiceContextTest {
         Assert.assertEquals(registeredResource, removedResource);
 
         Assert.assertEquals(resourceCounter - 1, serviceContext.getResources().size());
-    }
-
-    /**
-     * @verifies register domain object using the class name.
-     * @see ServiceContext#registerSearchable(com.muzima.search.api.model.object.Searchable)
-     */
-    @Test
-    public void registerObject_shouldRegisterDomainObjectUsingTheClassName() throws Exception {
-        Searchable clazz = serviceContext.getSearchable(Patient.class.getName());
-        Assert.assertNotNull(clazz);
-        Assert.assertEquals(Patient.class.getName(), clazz.getClass().getName());
-        serviceContext.removeSearchable(clazz);
-        clazz = serviceContext.getSearchable(Patient.class.getName());
-        Assert.assertNull(clazz);
-    }
-
-    /**
-     * @verifies register algorithm using the class name.
-     * @see ServiceContext#registerAlgorithm(com.muzima.search.api.model.serialization.Algorithm)
-     */
-    @Test
-    public void registerAlgorithm_shouldRegisterAlgorithmUsingTheClassName() throws Exception {
-        Algorithm algorithm = serviceContext.getAlgorithm(PatientAlgorithm.class.getName());
-        Assert.assertNotNull(algorithm);
-        Assert.assertEquals(PatientAlgorithm.class.getName(), algorithm.getClass().getName());
-    }
-
-    /**
-     * @verifies register resolver using the class name.
-     * @see ServiceContext#registerResolver(com.muzima.search.api.model.resolver.Resolver)
-     */
-    @Test
-    public void registerResolver_shouldRegisterResolverUsingTheClassName() throws Exception {
-        Resolver resolver = serviceContext.getResolver(PatientResolver.class.getName());
-        Assert.assertNotNull(resolver);
-        Assert.assertEquals(PatientResolver.class.getName(), resolver.getClass().getName());
     }
 }
