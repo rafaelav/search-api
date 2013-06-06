@@ -22,7 +22,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.muzima.search.api.internal.provider.SearcherProvider;
 import com.muzima.search.api.internal.provider.WriterProvider;
 import com.muzima.search.api.model.object.Searchable;
-import com.muzima.search.api.registry.Registry;
 import com.muzima.search.api.resource.Resource;
 import com.muzima.search.api.resource.SearchableField;
 import com.muzima.search.api.util.CollectionUtil;
@@ -53,6 +52,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DefaultIndexer implements Indexer {
 
@@ -71,7 +71,7 @@ public class DefaultIndexer implements Indexer {
     private SearcherProvider searcherProvider;
 
     @Inject
-    private Registry<String, Resource> resourceRegistry;
+    private Map<String, Resource> resourceRegistry;
 
     private final QueryParser parser;
 
@@ -95,7 +95,7 @@ public class DefaultIndexer implements Indexer {
      *
      * @return the resource registry object.
      */
-    public Registry<String, Resource> getResourceRegistry() {
+    public Map<String, Resource> getResourceRegistry() {
         return resourceRegistry;
     }
 
@@ -379,7 +379,7 @@ public class DefaultIndexer implements Indexer {
 
         for (Document document : documents) {
             String resourceName = document.get(DEFAULT_FIELD_RESOURCE);
-            Resource resource = getResourceRegistry().getEntryValue(resourceName);
+            Resource resource = getResourceRegistry().get(resourceName);
             String json = document.get(DEFAULT_FIELD_JSON);
             object = clazz.cast(resource.deserialize(json));
         }
@@ -432,7 +432,7 @@ public class DefaultIndexer implements Indexer {
         List<Document> documents = findDocuments(booleanQuery);
         for (Document document : documents) {
             String resourceName = document.get(DEFAULT_FIELD_RESOURCE);
-            Resource resource = getResourceRegistry().getEntryValue(resourceName);
+            Resource resource = getResourceRegistry().get(resourceName);
             String json = document.get(DEFAULT_FIELD_JSON);
             objects.add(clazz.cast(resource.deserialize(json)));
         }
@@ -480,7 +480,7 @@ public class DefaultIndexer implements Indexer {
         List<Document> documents = findDocuments(booleanQuery);
         for (Document document : documents) {
             String resourceName = document.get(DEFAULT_FIELD_RESOURCE);
-            Resource resource = getResourceRegistry().getEntryValue(resourceName);
+            Resource resource = getResourceRegistry().get(resourceName);
             String json = document.get(DEFAULT_FIELD_JSON);
             objects.add(clazz.cast(resource.deserialize(json)));
         }

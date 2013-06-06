@@ -86,10 +86,6 @@ public class RestAssuredServiceTest {
         Injector injector = Guice.createInjector(new SearchModule(), new JUnitModule());
         context = injector.getInstance(ServiceContext.class);
 
-        context.registerSearchable(new Patient());
-        context.registerResolver(new PatientResolver());
-        context.registerAlgorithm(new PatientAlgorithm());
-
         URL configurationUri = RestAssuredServiceTest.class.getResource(CORPUS_CONFIGURATION_FILE);
         context.registerResources(new File(configurationUri.getPath()));
 
