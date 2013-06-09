@@ -16,21 +16,22 @@
 
 package com.muzima.search.api.sample.resolver;
 
-import com.muzima.search.api.util.StringUtil;
+import java.io.IOException;
 
 public class PatientResolver extends AbstractResolver {
 
+    private static final String REPRESENTATION =
+            "?v=custom:(uuid,gender,birthdate,personName.givenName,personName.middleName,personName.familyName," +
+                    "patientIdentifier.identifier,patientIdentifier.identifierType.name)";
+
     /**
-     * Return the full URI to the REST resource based on the search string passed to the method.
+     * Return the full REST resource based on the search string passed to the method.
      *
      * @param searchString the search string
      * @return full URI to the REST resource
      */
     @Override
-    public String resolve(final String searchString) {
-        String param = StringUtil.EMPTY;
-        if (!StringUtil.isEmpty(searchString))
-            param = "?q=" + searchString;
-        return WEB_SERVER + WEB_CONTEXT + "ws/rest/v1/patient" + param;
+    public String resolve(final String searchString) throws IOException {
+        return WEB_SERVER + WEB_CONTEXT + "ws/rest/v1/patient/" + searchString + REPRESENTATION;
     }
 }

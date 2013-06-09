@@ -21,9 +21,13 @@ import com.google.inject.Injector;
 import com.jayway.jsonpath.JsonPath;
 import com.muzima.search.api.context.ServiceContext;
 import com.muzima.search.api.model.object.Searchable;
+import com.muzima.search.api.model.resolver.Resolver;
+import com.muzima.search.api.model.serialization.Algorithm;
 import com.muzima.search.api.module.JUnitModule;
 import com.muzima.search.api.module.SearchModule;
+import com.muzima.search.api.resource.ObjectResource;
 import com.muzima.search.api.resource.Resource;
+import com.muzima.search.api.resource.SearchableField;
 import com.muzima.search.api.sample.algorithm.PatientAlgorithm;
 import com.muzima.search.api.sample.domain.Patient;
 import com.muzima.search.api.sample.resolver.PatientResolver;
@@ -35,6 +39,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileReader;
@@ -58,7 +64,11 @@ public class RestAssuredServiceTest {
 
     private static final String PATIENT_RESOURCE = "Patient Resource";
 
+    private static final String INJECTED_PATIENT_RESOURCE = "Injected Patient Resource";
+
     private static final String CORPUS_CONFIGURATION_FILE = "sample/j2l/patient-template.j2l";
+
+    private final Logger logger = LoggerFactory.getLogger(RestAssuredServiceTest.class.getSimpleName());
 
     @BeforeClass
     public static void prepareData() throws Exception {
@@ -91,6 +101,19 @@ public class RestAssuredServiceTest {
 
         Resource resource = context.getResource(PATIENT_RESOURCE);
         Assert.assertNotNull(resource);
+
+        Algorithm patientAlgorithm = injector.getInstance(PatientAlgorithm.class);
+        Resolver patientResolver = injector.getInstance(PatientResolver.class);
+        Resource injectedResource = new ObjectResource(
+                INJECTED_PATIENT_RESOURCE, resource.getRootNode(),
+                Patient.class, patientAlgorithm, patientResolver);
+        for (SearchableField searchableField : resource.getSearchableFields()) {
+            injectedResource.addFieldDefinition(
+                    searchableField.getName(),
+                    searchableField.getExpression(),
+                    searchableField.isUnique());
+        }
+        context.registerResource(INJECTED_PATIENT_RESOURCE, injectedResource);
 
         service = injector.getInstance(RestAssuredService.class);
         Assert.assertNotNull(service);
@@ -129,29 +152,16 @@ public class RestAssuredServiceTest {
          * - You have installation of OpenMRS in your local computer
          * - At least a patient have name with letter "a" in the lucene repository
          */
-        /*
-        Resource resource = null;
 
-        resource = Context.getResource("Cohort Resource");
-        Assert.assertNotNull(resource);
-        service.loadObjects(StringUtil.EMPTY, resource);
-        List<Cohort> cohorts = service.getObjects(StringUtil.EMPTY, Cohort.class);
-        for (Cohort cohort : cohorts) {
-            resource = Context.getResource("Cohort Member Resource");
-            Assert.assertNotNull(resource);
-            service.loadObjects(cohort.getUuid(), resource);
-            List<Patient> patients = service.getObjects(StringUtil.EMPTY, Patient.class);
-            for (Patient patient : patients) {
-                resource = Context.getResource("Observation Resource");
-                Assert.assertNotNull(resource);
-                service.loadObjects(patient.getUuid(), resource);
-            }
+        Resource resource = context.getResource(INJECTED_PATIENT_RESOURCE);
+        List<Searchable> searchables = service.loadObjects("00006b1f-8bfb-4769-b443-ecf7eb908ab1", resource);
+        for (Searchable searchable : searchables) {
+            logger.info("Patient uuid: {}", ((Patient)searchable).getUuid());
         }
 
         List<Patient> patients = service.getObjects(StringUtil.EMPTY, Patient.class);
         Assert.assertNotNull(patients);
         Assert.assertTrue(patients.size() > 0);
-        */
     }
 
     /**

@@ -19,7 +19,11 @@ package com.muzima.search.api.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.Proxy;
 
 public class JUnitModule extends AbstractModule {
 
@@ -33,9 +37,20 @@ public class JUnitModule extends AbstractModule {
         String tmpDirectory = System.getProperty("java.io.tmpdir");
         bind(String.class)
                 .annotatedWith(Names.named("configuration.lucene.directory"))
-                .toInstance(tmpDirectory  + LUCENE_DIRECTORY);
+                .toInstance(tmpDirectory + LUCENE_DIRECTORY);
         bind(String.class)
                 .annotatedWith(Names.named("configuration.lucene.document.key"))
                 .toInstance("uuid");
+
+        // ampath test server specific bindings
+        bind(String.class)
+                .annotatedWith(Names.named("connection.username"))
+                .toInstance("test-server-username");
+        bind(String.class)
+                .annotatedWith(Names.named("connection.password"))
+                .toInstance("test-server-password");
+        bind(String.class)
+                .annotatedWith(Names.named("connection.server"))
+                .toInstance("test-server-ip-address");
     }
 }

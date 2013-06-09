@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package com.muzima.search.api.resource;
+package com.muzima.search.api.internal.http;
 
-public class ResourceConstants {
+import com.google.inject.Provider;
 
-    public static final String RESOURCE_NAME = "$['resource.name']";
+public class CustomKeyStoreProvider implements Provider<CustomKeyStore> {
 
-    public static final String ROOT_NODE = "$['node.root']";
+    protected CustomKeyStoreProvider() {
+    }
 
-    public static final String SEARCHABLE_CLASS = "$['resource.object']";
-
-    public static final String ALGORITHM_CLASS = "$['algorithm.class']";
-
-    public static final String RESOLVER_CLASS = "$['resolver.class']";
-
-    public static final String UNIQUE_FIELD = "$['field.unique']";
-
-    public static final String SEARCHABLE_FIELD = "$['field.searchable']";
+    @Override
+    public CustomKeyStore get() {
+        return new CustomKeyStore();
+    }
 }
