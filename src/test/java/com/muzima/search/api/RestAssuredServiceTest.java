@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,7 +125,7 @@ public class RestAssuredServiceTest {
         // load and save the corpus information into lucene database
         List<Searchable> searchables = service.loadObjects(StringUtil.EMPTY, resource, new File(corpus.getPath()));
         for (Searchable searchable : searchables) {
-            service.createObject(searchable, resource);
+            service.createObjects(Arrays.asList(searchable), resource);
         }
     }
 
@@ -293,7 +294,7 @@ public class RestAssuredServiceTest {
 
     /**
      * @verifies remove an object from the internal index system
-     * @see RestAssuredService#invalidate(com.muzima.search.api.model.object.Searchable, com.muzima.search.api.resource.Resource)
+     * @see RestAssuredService#deleteObjects(java.util.List, com.muzima.search.api.resource.Resource)
      */
     @Test
     public void invalidate_shouldRemoveAnObjectFromTheInternalIndexSystem() throws Exception {
@@ -302,9 +303,7 @@ public class RestAssuredServiceTest {
         Assert.assertEquals(patientUuid, patient.getUuid());
 
         Resource resource = context.getResource(PATIENT_RESOURCE);
-        Patient deletedPatient = (Patient) service.invalidate(patient, resource);
-        Assert.assertNotNull(deletedPatient);
-        Assert.assertEquals(patientUuid, deletedPatient.getUuid());
+        service.deleteObjects(Arrays.asList((Searchable) patient), resource);
 
         Patient afterDeletionPatient = service.getObject(patientUuid, Patient.class);
         Assert.assertNull(afterDeletionPatient);
