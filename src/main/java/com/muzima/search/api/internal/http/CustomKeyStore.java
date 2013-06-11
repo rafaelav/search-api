@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 
@@ -26,17 +28,17 @@ public class CustomKeyStore {
 
     private static final String SSL_CONTEXT_TLS = "TLS";
 
-    @Inject
+    @Inject(optional = true)
     @Named("key.store.type")
     private String keyStoreType;
 
-    @Inject
+    @Inject(optional = true)
     @Named("key.store.password")
     private String password;
 
-    @Inject
-    @Named("key.store.stream")
-    private InputStream inputStream;
+    @Inject(optional = true)
+    @Named("key.store.path")
+    private String path;
 
     protected CustomKeyStore() {
     }
@@ -46,6 +48,7 @@ public class CustomKeyStore {
         try {
             // Create a KeyStore containing our trusted CAs
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            FileInputStream inputStream = new FileInputStream(new File(path));
             keyStore.load(inputStream, password.toCharArray());
             // Create a TrustManager that trusts the CAs in our KeyStore
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();

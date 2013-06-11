@@ -53,7 +53,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
 
     private Indexer indexer;
 
-    @Inject
+    @Inject(optional = true)
     @Named("connection.proxy")
     private Proxy proxy;
 
@@ -90,10 +90,12 @@ public class RestAssuredServiceImpl implements RestAssuredService {
         try {
             Resolver resolver = resource.getResolver();
             URL url = new URL(resolver.resolve(searchString));
-            connection = (HttpURLConnection) url.openConnection(proxy);
+            connection = (HttpURLConnection) url.openConnection();
+            if (proxy != null) {
+                connection = (HttpURLConnection) url.openConnection(proxy);
+            }
             connection.setRequestMethod(GET);
             connection.setConnectTimeout(timeout);
-            connection.setReadTimeout(timeout);
             connection = resolver.authenticate(connection);
             inputStream = connection.getInputStream();
             return indexer.loadObjects(resource, inputStream);
