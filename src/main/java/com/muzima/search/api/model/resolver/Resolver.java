@@ -17,7 +17,7 @@
 package com.muzima.search.api.model.resolver;
 
 import java.io.IOException;
-import java.net.URLConnection;
+import java.net.HttpURLConnection;
 
 public interface Resolver {
 
@@ -30,10 +30,10 @@ public interface Resolver {
     String resolve(final String searchString) throws IOException;
 
     /**
-     * Add authentication information to the url connection.
+     * Add authentication information to the http url connection.
      *
      * @param connection the original connection without authentication information.
-     * @return the url connection with authentication information.
+     * @return the connection with authentication information when applicable.
      */
-    URLConnection authenticate(final URLConnection connection) throws IOException;
+    HttpURLConnection authenticate(final HttpURLConnection connection) throws IOException;
 }

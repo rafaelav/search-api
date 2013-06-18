@@ -41,11 +41,11 @@ public interface Indexer {
 
     List<Searchable> getObjects(final String searchString, final Resource resource) throws ParseException, IOException;
 
-    Searchable deleteObject(final Searchable object, final Resource resource) throws IOException;
+    void deleteObjects(final List<Searchable> objects, final Resource resource) throws IOException;
 
-    Searchable createObject(Searchable object, Resource resource) throws IOException;
+    void createObjects(final List<Searchable> objects, Resource resource) throws IOException;
 
-    Searchable updateObject(Searchable object, Resource resource) throws IOException;
+    void updateObjects(final List<Searchable> objects, Resource resource) throws IOException;
 
     void commit() throws IOException;
 }

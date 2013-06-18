@@ -32,18 +32,30 @@ import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.TermQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RestAssuredServiceImpl implements RestAssuredService {
 
+    private static final String GET = "GET";
+
+    private final Logger logger = LoggerFactory.getLogger(RestAssuredServiceImpl.class.getSimpleName());
+
     private Indexer indexer;
+
+    @Inject(optional = true)
+    @Named("connection.proxy")
+    private Proxy proxy;
 
     @Inject
     @Named("connection.timeout")
@@ -59,31 +71,47 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * <p/>
      * This method will use the URI resolver to resolve the URI of the REST resources and then apply the
      * <code>searchString</code> to limit the data that needs to get converted.
+     * <p/>
+     * TODO: need to handle paging
+     * - one of the solution probably merging this loadObject into:
+     * - loadObject(final Resource resource, final String payload)
+     * - this method then will read the response from the server
+     * - delegate the paging handling to the subclass (if applicable).
+     * - short term solution: increase the page size
+     * <p/>
      *
      * @param searchString the string to filter object that from the REST resource.
      * @param resource     the resource object which will describe how to index the json resource to lucene.
      */
     @Override
     public List<Searchable> loadObjects(final String searchString, final Resource resource) throws IOException {
-
-        Resolver resolver = resource.getResolver();
-
-        URL url = new URL(resolver.resolve(searchString));
-        URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(timeout);
-        connection = resolver.authenticate(connection);
-        // TODO: need to handle paging
-        // - one of the solution probably merging this loadObject into:
-        //   - loadObject(final Resource resource, final String payload)
-        //   - this method then will read the response from the server
-        //   - delegate the paging handling to the subclass (if applicable).
-        // - short term solution: increase the page size
-        return indexer.loadObjects(resource, connection.getInputStream());
+        InputStream inputStream = null;
+        HttpURLConnection connection = null;
+        try {
+            Resolver resolver = resource.getResolver();
+            URL url = new URL(resolver.resolve(searchString));
+            connection = (HttpURLConnection) url.openConnection();
+            if (proxy != null) {
+                connection = (HttpURLConnection) url.openConnection(proxy);
+            }
+            connection.setRequestMethod(GET);
+            connection.setConnectTimeout(timeout);
+            connection = resolver.authenticate(connection);
+            inputStream = connection.getInputStream();
+            return indexer.loadObjects(resource, inputStream);
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 
     /**
      * Convert JSON from local file to the correct object representation.
-     *
+     * <p/>
      * This method will load locally saved json payload and then apply the <code>searchString</code> to limit the data
      * that needs to get converted.
      *
@@ -225,7 +253,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
     }
 
     /**
-     * Remove an object based on the resource from the local repository. The method will determine if there's unique
+     * Remove objects based on the resource from the local repository. The method will determine if there's unique
      * <code>object</code> in the local repository and then remove it. This method will return null if there's no
      * object in the local repository match the object passed to this method.
      * <p/>
@@ -233,17 +261,16 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * recreate unique key query to find the entry in the local lucene repository. If no unique searchable field is
      * specified in the resource configuration, this method will use all searchable index to find the entry.
      *
-     * @param object   the object to be removed if the object exists.
+     * @param objects   the objects to be removed if the objects exist.
      * @param resource the resource object which will describe how to index the json resource to lucene.
-     * @return removed object or null if no object was removed.
      */
     @Override
-    public Searchable invalidate(final Searchable object, final Resource resource) throws IOException {
-        return indexer.deleteObject(object, resource);
+    public void deleteObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+        indexer.deleteObjects(objects, resource);
     }
 
     /**
-     * Create an instance of object in the local repository.
+     * Create instances of objects in the local repository.
      * <p/>
      * Internally, this method will serialize the object and using the resource configuration to create an entry in
      * the lucene local repository.
@@ -254,28 +281,26 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * _resource : the resource configuration used to convert the json to lucene
      * </pre>
      *
-     * @param object   the object to be created
+     * @param objects   the objects to be created
      * @param resource the resource object which will describe how to index the json resource to lucene.
-     * @return the object that was created
      */
     @Override
-    public Searchable createObject(final Searchable object, final Resource resource) throws IOException {
-        return indexer.createObject(object, resource);
+    public void createObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+        indexer.createObjects(objects, resource);
     }
 
     /**
-     * Update an instance of object in the local repository.
+     * Update instances of objects in the local repository.
      * <p/>
      * Internally, this method will perform invalidation of the object and then recreate the object in the local lucene
      * repository. If the changes are performed on the unique searchable field, this method will end up creating a new
      * entry in the lucene local repository.
      *
-     * @param object   the object to be updated
+     * @param objects   the objects to be updated
      * @param resource the resource object which will describe how to index the json resource to lucene.
-     * @return the object that was updated
      */
     @Override
-    public Searchable updateObject(final Searchable object, final Resource resource) throws IOException {
-        return indexer.updateObject(object, resource);
+    public void updateObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+        indexer.updateObjects(objects, resource);
     }
 }

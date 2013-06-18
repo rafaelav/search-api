@@ -517,32 +517,32 @@ public class DefaultIndexer implements Indexer {
     }
 
     @Override
-    public Searchable deleteObject(final Searchable object, final Resource resource)
-            throws IOException {
-        String jsonString = resource.serialize(object);
-        Object jsonObject = JsonPath.read(jsonString, "$");
-        deleteObject(jsonObject, resource, getIndexWriter());
+    public void deleteObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+        for (Searchable object : objects) {
+            String jsonString = resource.serialize(object);
+            Object jsonObject = JsonPath.read(jsonString, "$");
+            deleteObject(jsonObject, resource, getIndexWriter());
+        }
         commit();
-        return object;
     }
 
     @Override
-    public Searchable createObject(final Searchable object, final Resource resource)
-            throws IOException {
-        String jsonString = resource.serialize(object);
-        Object jsonObject = JsonPath.read(jsonString, "$");
-        writeObject(jsonObject, resource, getIndexWriter());
+    public void createObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+        for (Searchable object : objects) {
+            String jsonString = resource.serialize(object);
+            Object jsonObject = JsonPath.read(jsonString, "$");
+            writeObject(jsonObject, resource, getIndexWriter());
+        }
         commit();
-        return object;
     }
 
     @Override
-    public Searchable updateObject(final Searchable object, final Resource resource)
-            throws IOException {
-        String jsonString = resource.serialize(object);
-        Object jsonObject = JsonPath.read(jsonString, "$");
-        updateObject(jsonObject, resource, getIndexWriter());
+    public void updateObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+        for (Searchable object : objects) {
+            String jsonString = resource.serialize(object);
+            Object jsonObject = JsonPath.read(jsonString, "$");
+            updateObject(jsonObject, resource, getIndexWriter());
+        }
         commit();
-        return object;
     }
 }

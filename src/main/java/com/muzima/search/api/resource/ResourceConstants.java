@@ -16,9 +16,6 @@
 
 package com.muzima.search.api.resource;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class ResourceConstants {
 
     public static final String RESOURCE_NAME = "$['resource.name']";

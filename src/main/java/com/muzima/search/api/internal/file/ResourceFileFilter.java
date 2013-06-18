@@ -26,12 +26,15 @@ public class ResourceFileFilter implements FileFilter {
 
     public static final String RESOURCE_FILE_EXTENSION = "j2l";
 
+    public static final String JSON_FILE_EXTENSION = "json";
+
     @Override
     public boolean accept(final File file) {
         if (file.isDirectory())
             return true;
 
         String extension = FilenameUtil.getExtension(file);
-        return StringUtil.equals(extension, RESOURCE_FILE_EXTENSION);
+        return (StringUtil.equals(extension, RESOURCE_FILE_EXTENSION)
+                || StringUtil.equals(extension, JSON_FILE_EXTENSION));
     }
 }

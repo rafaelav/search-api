@@ -148,7 +148,7 @@ public interface RestAssuredService {
     List<Searchable> getObjects(final String searchString, final Resource resource) throws ParseException, IOException;
 
     /**
-     * Remove an object based on the resource from the local repository. The method will determine if there's unique
+     * Remove objects based on the resource from the local repository. The method will determine if there's unique
      * <code>object</code> in the local repository and then remove it. This method will return null if there's no
      * object in the local repository match the object passed to this method.
      * <p/>
@@ -156,35 +156,32 @@ public interface RestAssuredService {
      * recreate unique key query to find the entry in the local lucene repository. If no unique searchable field is
      * specified in the resource configuration, this method will use all searchable index to find the entry.
      *
-     * @param object   the object to be removed if the object exists.
+     * @param objects   the objects to be removed if the objects exist.
      * @param resource the resource object which will describe how to index the json resource to lucene.
-     * @return removed object or null if no object was removed.
      * @should remove an object from the internal index system
      */
-    Searchable invalidate(final Searchable object, final Resource resource) throws IOException;
+    void deleteObjects(final List<Searchable> objects, final Resource resource) throws IOException;
 
     /**
-     * Create an instance of object in the local repository.
+     * Create instances of object in the local repository.
      * <p/>
      * Internally, this method will serialize the object and using the resource configuration to create an entry in
      * the lucene local repository.
      *
-     * @param object   the object to be created
+     * @param objects   the objects to be created.
      * @param resource the resource object which will describe how to index the json resource to lucene.
-     * @return the object that was created
      */
-    Searchable createObject(Searchable object, Resource resource) throws IOException;
+    void createObjects(final List<Searchable> objects, Resource resource) throws IOException;
 
     /**
-     * Update an instance of object in the local repository.
+     * Update instances of object in the local repository.
      * <p/>
      * Internally, this method will perform invalidation of the object and then recreate the object in the local lucene
      * repository. If the changes are performed on the unique searchable field, this method will end up creating a new
      * entry in the lucene local repository.
      *
-     * @param object   the object to be updated
+     * @param objects   the objects to be updated.
      * @param resource the resource object which will describe how to index the json resource to lucene.
-     * @return the object that was updated
      */
-    Searchable updateObject(Searchable object, Resource resource) throws IOException;
+    void updateObjects(final List<Searchable> objects, Resource resource) throws IOException;
 }
