@@ -22,5 +22,5 @@ import java.io.IOException;
 
 public interface SearchProvider<T> extends CheckedProvider<T> {
 
-    T get() throws IOException;
+    T get() throws IOException, Exception;
 }

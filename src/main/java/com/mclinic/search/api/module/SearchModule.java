@@ -50,6 +50,8 @@ public class SearchModule extends AbstractModule {
      */
     @Override
     protected void configure() {
+        bind(String.class).annotatedWith(Names.named("configuration.lucene.directory")).toInstance("indexed");
+
         bind(Logger.class).to(ConsoleLogger.class).in(Singleton.class);
 
         bind(Integer.class)

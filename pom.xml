@@ -10,6 +10,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>lucene.transform</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
             <version>1.7.2</version>
@@ -52,6 +57,62 @@
             <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.13</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>lucene.transform</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>lucene.transform</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>lucene.transform</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>lucene.transform</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>lucene.transform</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>lucene-extra</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>lucene.transform</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>lucene.transform</groupId>
+            <artifactId>lucenetransform</artifactId>
+            <version>0.9.2.2</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -83,7 +144,7 @@
                         <dependency>
                             <groupId>org.aspectj</groupId>
                             <artifactId>aspectjtools</artifactId>
-                            <version>1.7.2</version>
+                            <version>1.6.11</version>
                         </dependency>
                     </dependencies>
                 </plugin>
