@@ -94,7 +94,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      */
     @Override
     public void loadObjects(final String searchString, final Resource resource)
-            throws ParseException, IOException {
+            throws Exception {
 
         Resolver resolver = resource.getResolver();
 
@@ -124,12 +124,12 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      */
     @Override
     public void loadObjects(final String searchString, final Resource resource, final File file)
-            throws ParseException, IOException {
+            throws Exception {
         loadObjects(searchString, resource, file, true);
     }
 
     private void loadObjects(final String searchString, final Resource resource, final File file, final boolean commit)
-            throws ParseException, IOException {
+            throws Exception {
         if (!file.isDirectory() && FilenameUtil.contains(file.getName(), searchString)) {
             FileInputStream stream = null;
             try {
@@ -165,7 +165,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return object with matching key and clazz or null
      */
     @Override
-    public <T> T getObject(final String key, final Class<T> clazz) throws ParseException, IOException {
+    public <T> T getObject(final String key, final Class<T> clazz) throws Exception {
         return indexer.getObject(key, clazz);
     }
 
@@ -182,7 +182,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return object with matching key and clazz or null
      */
     @Override
-    public Searchable getObject(final String key, final Resource resource) throws ParseException, IOException {
+    public Searchable getObject(final String key, final Resource resource) throws Exception {
         return indexer.getObject(key, resource);
     }
 
@@ -196,7 +196,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @should return all object matching the search query string and class
      * @should return empty list when no object match the search query and class
      */
-    public <T> List<T> getObjects(final List<Filter> filters, final Class<T> clazz) throws IOException {
+    public <T> List<T> getObjects(final List<Filter> filters, final Class<T> clazz) throws Exception {
         BooleanQuery booleanQuery = null;
         if (!CollectionUtil.isEmpty(filters)) {
             booleanQuery = new BooleanQuery();
@@ -219,7 +219,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @should return all object matching the search query and resource
      * @should return empty list when no object match the search query and resource
      */
-    public List<Searchable> getObjects(final List<Filter> filters, final Resource resource) throws IOException {
+    public List<Searchable> getObjects(final List<Filter> filters, final Resource resource) throws Exception {
         BooleanQuery booleanQuery = null;
         if (!CollectionUtil.isEmpty(filters)) {
             booleanQuery = new BooleanQuery();
@@ -241,7 +241,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return list of all object with matching <code>searchString</code> and <code>clazz</code> or empty list
      */
     @Override
-    public <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws ParseException, IOException {
+    public <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws Exception {
         return indexer.getObjects(searchString, clazz);
     }
 
@@ -256,7 +256,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      */
     @Override
     public List<Searchable> getObjects(final String searchString, final Resource resource)
-            throws ParseException, IOException {
+            throws Exception {
         return indexer.getObjects(searchString, resource);
     }
 
@@ -274,7 +274,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return removed object or null if no object was removed.
      */
     @Override
-    public Searchable invalidate(final Searchable object, final Resource resource) throws ParseException, IOException {
+    public Searchable invalidate(final Searchable object, final Resource resource) throws Exception {
         return indexer.deleteObject(object, resource);
     }
 
@@ -289,7 +289,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return the object that was created
      */
     @Override
-    public Searchable createObject(final Searchable object, final Resource resource) throws ParseException, IOException {
+    public Searchable createObject(final Searchable object, final Resource resource) throws Exception {
         return indexer.createObject(object, resource);
     }
 
@@ -305,7 +305,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return the object that was updated
      */
     @Override
-    public Searchable updateObject(final Searchable object, final Resource resource) throws ParseException, IOException {
+    public Searchable updateObject(final Searchable object, final Resource resource) throws Exception {
         return indexer.updateObject(object, resource);
     }
 }

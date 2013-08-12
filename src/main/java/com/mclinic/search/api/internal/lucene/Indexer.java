@@ -28,25 +28,25 @@ import java.util.List;
 
 public interface Indexer extends Loggable {
 
-    void loadObjects(final Resource resource, final InputStream inputStream) throws ParseException, IOException;
+    void loadObjects(final Resource resource, final InputStream inputStream) throws Exception;
 
-    <T> T getObject(final String key, final Class<T> clazz) throws ParseException, IOException;
+    <T> T getObject(final String key, final Class<T> clazz) throws Exception;
 
-    Searchable getObject(final String key, final Resource resource) throws ParseException, IOException;
+    Searchable getObject(final String key, final Resource resource) throws Exception;
 
-    <T> List<T> getObjects(final Query query, final Class<T> clazz) throws IOException;
+    <T> List<T> getObjects(final Query query, final Class<T> clazz) throws Exception;
 
-    List<Searchable> getObjects(final Query query, final Resource resource) throws IOException;
+    List<Searchable> getObjects(final Query query, final Resource resource) throws Exception;
 
-    <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws ParseException, IOException;
+    <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws Exception;
 
-    List<Searchable> getObjects(final String searchString, final Resource resource) throws ParseException, IOException;
+    List<Searchable> getObjects(final String searchString, final Resource resource) throws Exception;
 
-    Searchable deleteObject(final Searchable object, final Resource resource) throws ParseException, IOException;
+    Searchable deleteObject(final Searchable object, final Resource resource) throws Exception;
 
-    Searchable createObject(Searchable object, Resource resource) throws ParseException, IOException;
+    Searchable createObject(Searchable object, Resource resource) throws Exception;
 
-    Searchable updateObject(Searchable object, Resource resource) throws ParseException, IOException;
+    Searchable updateObject(Searchable object, Resource resource) throws Exception;
 
-    void commit() throws IOException;
+    void commit() throws Exception;
 }

@@ -35,6 +35,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openmrs.Cohort;
+import android.content.Context;
 
 import java.io.File;
 import java.io.FileReader;
@@ -125,13 +127,13 @@ public class RestAssuredServiceTest {
      */
     @Test
     public void loadObjects_shouldLoadObjectsBasedOnTheResourceDescription() throws Exception {
-        Assert.assertNotNull("You need to uncomment this unit test to test it with the rest module.");
+        //Assert.assertNotNull("You need to uncomment this unit test to test it with the rest module.");
         /*
          * This part of the unit test use the following assumption:
          * - You have installation of OpenMRS in your local computer
          * - At least a patient have name with letter "a" in the lucene repository
          */
-        /*
+
         Resource resource = null;
 
         resource = Context.getResource("Cohort Resource");
@@ -153,7 +155,7 @@ public class RestAssuredServiceTest {
         List<Patient> patients = service.getObjects(StringUtil.EMPTY, Patient.class);
         Assert.assertNotNull(patients);
         Assert.assertTrue(patients.size() > 0);
-        */
+
     }
 
     /**

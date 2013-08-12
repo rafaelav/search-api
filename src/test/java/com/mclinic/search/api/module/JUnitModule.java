@@ -41,6 +41,10 @@ public class JUnitModule extends AbstractModule {
                 .annotatedWith(Names.named("configuration.lucene.document.key"))
                 .toInstance("uuid");
 
+        bind(String.class).annotatedWith(Names.named("configuration.lucene.encryption")).toInstance("AES/ECB/PKCS5Padding");
+        bind(Boolean.class).annotatedWith(Names.named("configuration.lucene.usingEncryption")).toInstance(true);
+        bind(Boolean.class).annotatedWith(Names.named("configuration.lucene.usingCompression")).toInstance(false);
+
         bind(LogLevel.class).toInstance(LogLevel.DEBUG);
     }
 }

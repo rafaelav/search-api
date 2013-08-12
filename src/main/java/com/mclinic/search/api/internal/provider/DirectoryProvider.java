@@ -50,7 +50,7 @@ public class DirectoryProvider implements SearchProvider<Directory> {
     Boolean usingEncryption;
 
     @Inject(optional = true)
-    @Named("configuration.lucene.password")
+    @Named("configuration.lucene.document.key")
     String password;
 
     @Inject(optional = true)

@@ -32,7 +32,7 @@ public class SearcherProvider implements SearchProvider<IndexSearcher> {
     }
 
     @Override
-    public IndexSearcher get() throws IOException {
+    public IndexSearcher get() throws Exception {
         IndexReader indexReader = readerProvider.get();
         return new IndexSearcher(indexReader);
     }

@@ -42,7 +42,7 @@ public class WriterProvider implements SearchProvider<IndexWriter> {
     }
 
     @Override
-    public IndexWriter get() throws IOException {
+    public IndexWriter get() throws Exception {
         Directory directory = directoryProvider.get();
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         return new IndexWriter(directory, config);

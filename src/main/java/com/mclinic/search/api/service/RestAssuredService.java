@@ -45,7 +45,7 @@ public interface RestAssuredService extends Loggable {
      * @should load objects based on the resource description
      */
     void loadObjects(final String searchString, final Resource resource)
-            throws ParseException, IOException;
+            throws Exception;
 
     /**
      * Load object described using the <code>resource</code> into local lucene repository. This method will load locally
@@ -59,7 +59,7 @@ public interface RestAssuredService extends Loggable {
      * @see RestAssuredService#loadObjects(String, com.mclinic.search.api.resource.Resource)
      */
     void loadObjects(final String searchString, final Resource resource, final File file)
-            throws ParseException, IOException;
+            throws Exception;
 
     /**
      * Search for an object with matching <code>key</code> and <code>clazz</code> type from the local repository. This
@@ -77,7 +77,7 @@ public interface RestAssuredService extends Loggable {
      * @should return null when no object match the key and type
      * @should throw IOException if the key and class unable to return unique object
      */
-    <T> T getObject(final String key, final Class<T> clazz) throws ParseException, IOException;
+    <T> T getObject(final String key, final Class<T> clazz) throws Exception;
 
     /**
      * Search for an object with matching <code>key</code> and <code>clazz</code> type from the local repository. This
@@ -94,7 +94,7 @@ public interface RestAssuredService extends Loggable {
      * @should return null when no object match the key
      * @should throw IOException if the key and resource unable to return unique object
      */
-    Searchable getObject(final String key, final Resource resource) throws ParseException, IOException;
+    Searchable getObject(final String key, final Resource resource) throws Exception;
 
     /**
      * Search for objects with matching <code>filter</code> and <code>clazz</code> type from the local repository.
@@ -107,7 +107,7 @@ public interface RestAssuredService extends Loggable {
      * @should return all object matching the search query string and class
      * @should return empty list when no object match the search query and class
      */
-    <T> List<T> getObjects(final List<Filter> filters, final Class<T> clazz) throws IOException;
+    <T> List<T> getObjects(final List<Filter> filters, final Class<T> clazz) throws Exception;
 
     /**
      * Search for objects with matching <code>filters</code> and <code>resource</code> type from the local repository.
@@ -120,7 +120,7 @@ public interface RestAssuredService extends Loggable {
      * @should return all object matching the search query and resource
      * @should return empty list when no object match the search query and resource
      */
-    List<Searchable> getObjects(final List<Filter> filters, final Resource resource) throws IOException;
+    List<Searchable> getObjects(final List<Filter> filters, final Resource resource) throws Exception;
 
     /**
      * Search for objects with matching <code>searchString</code> and <code>clazz</code> type from the local repository.
@@ -132,7 +132,7 @@ public interface RestAssuredService extends Loggable {
      * @should return all object matching the search string and class
      * @should return empty list when no object match the search string and class
      */
-    <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws ParseException, IOException;
+    <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws Exception;
 
     /**
      * Search for objects with matching <code>searchString</code> and <code>resource</code> type from the local
@@ -145,7 +145,7 @@ public interface RestAssuredService extends Loggable {
      * @should return all object matching the search string and resource
      * @should return empty list when no object match the search string and resource
      */
-    List<Searchable> getObjects(final String searchString, final Resource resource) throws ParseException, IOException;
+    List<Searchable> getObjects(final String searchString, final Resource resource) throws Exception;
 
     /**
      * Remove an object based on the resource from the local repository. The method will determine if there's unique
@@ -161,7 +161,7 @@ public interface RestAssuredService extends Loggable {
      * @return removed object or null if no object was removed.
      * @should remove an object from the internal index system
      */
-    Searchable invalidate(final Searchable object, final Resource resource) throws ParseException, IOException;
+    Searchable invalidate(final Searchable object, final Resource resource) throws Exception;
 
     /**
      * Create an instance of object in the local repository.
@@ -173,7 +173,7 @@ public interface RestAssuredService extends Loggable {
      * @param resource the resource object which will describe how to index the json resource to lucene.
      * @return the object that was created
      */
-    Searchable createObject(Searchable object, Resource resource) throws ParseException, IOException;
+    Searchable createObject(Searchable object, Resource resource) throws Exception;
 
     /**
      * Update an instance of object in the local repository.
@@ -186,5 +186,5 @@ public interface RestAssuredService extends Loggable {
      * @param resource the resource object which will describe how to index the json resource to lucene.
      * @return the object that was updated
      */
-    Searchable updateObject(Searchable object, Resource resource) throws ParseException, IOException;
+    Searchable updateObject(Searchable object, Resource resource) throws Exception;
 }
