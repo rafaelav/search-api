@@ -27,25 +27,26 @@ import java.util.List;
 
 public interface Indexer {
 
-    List<Searchable> loadObjects(final Resource resource, final InputStream inputStream) throws IOException;
+    List<Searchable> loadObjects(final Resource resource, final InputStream inputStream) throws Exception;
 
-    <T> T getObject(final String key, final Class<T> clazz) throws IOException;
+    <T> T getObject(final String key, final Class<T> clazz) throws Exception;
 
-    Searchable getObject(final String key, final Resource resource) throws IOException;
+    Searchable getObject(final String key, final Resource resource) throws Exception;
 
-    <T> List<T> getObjects(final Query query, final Class<T> clazz) throws IOException;
+    <T> List<T> getObjects(final Query query, final Class<T> clazz) throws Exception;
 
-    List<Searchable> getObjects(final Query query, final Resource resource) throws IOException;
+    List<Searchable> getObjects(final Query query, final Resource resource) throws Exception;
 
-    <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws ParseException, IOException;
+    <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws Exception;
 
-    List<Searchable> getObjects(final String searchString, final Resource resource) throws ParseException, IOException;
+    List<Searchable> getObjects(final String searchString, final Resource resource) throws Exception;
 
-    void deleteObjects(final List<Searchable> objects, final Resource resource) throws IOException;
+    void deleteObjects(final List<Searchable> objects, final Resource resource) throws Exception;
 
-    void createObjects(final List<Searchable> objects, Resource resource) throws IOException;
+    void createObjects(final List<Searchable> objects, Resource resource) throws Exception;
 
-    void updateObjects(final List<Searchable> objects, Resource resource) throws IOException;
+    void updateObjects(final List<Searchable> objects, Resource resource) throws Exception;
 
-    void commit() throws IOException;
+
+    void commit() throws Exception;
 }

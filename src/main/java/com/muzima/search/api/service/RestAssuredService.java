@@ -44,7 +44,8 @@ public interface RestAssuredService {
      * @param resource     the resource object which will describe how to index the json resource to lucene.
      * @should load objects based on the resource description
      */
-    List<Searchable> loadObjects(final String searchString, final Resource resource) throws IOException;
+
+    List<Searchable> loadObjects(final String searchString, final Resource resource) throws Exception;
 
     /**
      * Load object described using the <code>resource</code> into local lucene repository. This method will load locally
@@ -58,8 +59,10 @@ public interface RestAssuredService {
      * @should load object from filesystem based on the resource description
      * @see RestAssuredService#loadObjects(String, com.muzima.search.api.resource.Resource)
      */
+
     List<Searchable> loadObjects(final String searchString, final Resource resource, final File file)
-            throws IOException;
+            throws Exception;
+
 
     /**
      * Search for an object with matching <code>key</code> and <code>clazz</code> type from the local repository. This
@@ -77,7 +80,9 @@ public interface RestAssuredService {
      * @should return null when no object match the key and type
      * @should throw IOException if the key and class unable to return unique object
      */
-    <T> T getObject(final String key, final Class<T> clazz) throws IOException;
+
+    <T> T getObject(final String key, final Class<T> clazz) throws Exception;
+
 
     /**
      * Search for an object with matching <code>key</code> and <code>clazz</code> type from the local repository. This
@@ -94,7 +99,9 @@ public interface RestAssuredService {
      * @should return null when no object match the key
      * @should throw IOException if the key and resource unable to return unique object
      */
-    Searchable getObject(final String key, final Resource resource) throws IOException;
+
+    Searchable getObject(final String key, final Resource resource) throws Exception;
+
 
     /**
      * Search for objects with matching <code>filter</code> and <code>clazz</code> type from the local repository.
@@ -107,7 +114,7 @@ public interface RestAssuredService {
      * @should return all object matching the search query string and class
      * @should return empty list when no object match the search query and class
      */
-    <T> List<T> getObjects(final List<Filter> filters, final Class<T> clazz) throws IOException;
+    <T> List<T> getObjects(final List<Filter> filters, final Class<T> clazz) throws Exception;
 
     /**
      * Search for objects with matching <code>filters</code> and <code>resource</code> type from the local repository.
@@ -120,7 +127,7 @@ public interface RestAssuredService {
      * @should return all object matching the search query and resource
      * @should return empty list when no object match the search query and resource
      */
-    List<Searchable> getObjects(final List<Filter> filters, final Resource resource) throws IOException;
+    List<Searchable> getObjects(final List<Filter> filters, final Resource resource) throws Exception;
 
     /**
      * Search for objects with matching <code>searchString</code> and <code>clazz</code> type from the local repository.
@@ -132,7 +139,7 @@ public interface RestAssuredService {
      * @should return all object matching the search string and class
      * @should return empty list when no object match the search string and class
      */
-    <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws ParseException, IOException;
+    <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws Exception;
 
     /**
      * Search for objects with matching <code>searchString</code> and <code>resource</code> type from the local
@@ -145,7 +152,7 @@ public interface RestAssuredService {
      * @should return all object matching the search string and resource
      * @should return empty list when no object match the search string and resource
      */
-    List<Searchable> getObjects(final String searchString, final Resource resource) throws ParseException, IOException;
+    List<Searchable> getObjects(final String searchString, final Resource resource) throws Exception;
 
     /**
      * Remove objects based on the resource from the local repository. The method will determine if there's unique
@@ -160,7 +167,8 @@ public interface RestAssuredService {
      * @param resource the resource object which will describe how to index the json resource to lucene.
      * @should remove an object from the internal index system
      */
-    void deleteObjects(final List<Searchable> objects, final Resource resource) throws IOException;
+
+    void deleteObjects(final List<Searchable> objects, final Resource resource) throws Exception;
 
     /**
      * Create instances of object in the local repository.
@@ -171,7 +179,9 @@ public interface RestAssuredService {
      * @param objects   the objects to be created.
      * @param resource the resource object which will describe how to index the json resource to lucene.
      */
-    void createObjects(final List<Searchable> objects, Resource resource) throws IOException;
+
+    void createObjects(final List<Searchable> objects, Resource resource) throws Exception;
+
 
     /**
      * Update instances of object in the local repository.
@@ -183,5 +193,7 @@ public interface RestAssuredService {
      * @param objects   the objects to be updated.
      * @param resource the resource object which will describe how to index the json resource to lucene.
      */
-    void updateObjects(final List<Searchable> objects, Resource resource) throws IOException;
+
+    void updateObjects(final List<Searchable> objects, Resource resource) throws Exception;
+
 }

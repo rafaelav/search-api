@@ -49,6 +49,13 @@ public class SearchModule extends AbstractModule {
      */
     @Override
     protected void configure() {
+//<<<<<<< HEAD:src/main/java/com/muzima/search/api/module/SearchModule.java
+//=======
+//        //bind(String.class).annotatedWith(Names.named("configuration.lucene.directory")).toInstance("indexed");
+//
+//        bind(Logger.class).to(ConsoleLogger.class).in(Singleton.class);
+//
+//>>>>>>> cherry-picking:src/main/java/com/mclinic/search/api/module/SearchModule.java
         bind(Integer.class)
                 .annotatedWith(Names.named("connection.timeout"))
                 .toInstance(1000);

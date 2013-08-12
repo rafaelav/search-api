@@ -84,7 +84,8 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @param resource     the resource object which will describe how to index the json resource to lucene.
      */
     @Override
-    public List<Searchable> loadObjects(final String searchString, final Resource resource) throws IOException {
+//<<<<<<< HEAD:src/main/java/com/muzima/search/api/service/impl/RestAssuredServiceImpl.java
+    public List<Searchable> loadObjects(final String searchString, final Resource resource) throws Exception {
         InputStream inputStream = null;
         HttpURLConnection connection = null;
         try {
@@ -107,6 +108,25 @@ public class RestAssuredServiceImpl implements RestAssuredService {
                 connection.disconnect();
             }
         }
+//=======
+//    public void loadObjects(final String searchString, final Resource resource)
+//            throws Exception {
+//
+//        Resolver resolver = resource.getResolver();
+//
+//        URL url = new URL(resolver.resolve(searchString));
+//        URLConnection connection = url.openConnection();
+//        connection.setConnectTimeout(timeout);
+//        connection = resolver.authenticate(connection);
+//        // TODO: need to handle paging
+//        // - one of the solution probably merging this loadObject into:
+//        //   - loadObject(final Resource resource, final String payload)
+//        //   - this method then will read the response from the server
+//        //   - delegate the paging handling to the subclass (if applicable).
+//        // - short term solution: increase the page size
+//        indexer.loadObjects(resource, connection.getInputStream());
+//        indexer.commit();
+//>>>>>>> cherry-picking:src/main/java/com/mclinic/search/api/service/impl/RestAssuredServiceImpl.java
     }
 
     /**
@@ -121,9 +141,19 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @see RestAssuredService#loadObjects(String, com.muzima.search.api.resource.Resource)
      */
     @Override
+//<<<<<<< HEAD:src/main/java/com/muzima/search/api/service/impl/RestAssuredServiceImpl.java
     public List<Searchable> loadObjects(final String searchString, final Resource resource, final File file)
-            throws IOException {
+            throws Exception {
         List<Searchable> searchables = new ArrayList<Searchable>();
+//=======
+//    public void loadObjects(final String searchString, final Resource resource, final File file)
+//            throws Exception {
+//        loadObjects(searchString, resource, file, true);
+//    }
+//
+//    private void loadObjects(final String searchString, final Resource resource, final File file, final boolean commit)
+//            throws Exception {
+//>>>>>>> cherry-picking:src/main/java/com/mclinic/search/api/service/impl/RestAssuredServiceImpl.java
         if (!file.isDirectory() && FilenameUtil.contains(file.getName(), searchString)) {
             FileInputStream stream = null;
             try {
@@ -157,7 +187,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return object with matching key and clazz or null
      */
     @Override
-    public <T> T getObject(final String key, final Class<T> clazz) throws IOException {
+    public <T> T getObject(final String key, final Class<T> clazz) throws Exception {
         return indexer.getObject(key, clazz);
     }
 
@@ -174,7 +204,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return object with matching key and clazz or null
      */
     @Override
-    public Searchable getObject(final String key, final Resource resource) throws IOException {
+    public Searchable getObject(final String key, final Resource resource) throws Exception {
         return indexer.getObject(key, resource);
     }
 
@@ -188,7 +218,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @should return all object matching the search query string and class
      * @should return empty list when no object match the search query and class
      */
-    public <T> List<T> getObjects(final List<Filter> filters, final Class<T> clazz) throws IOException {
+    public <T> List<T> getObjects(final List<Filter> filters, final Class<T> clazz) throws Exception {
         BooleanQuery booleanQuery = null;
         if (!CollectionUtil.isEmpty(filters)) {
             booleanQuery = new BooleanQuery();
@@ -211,7 +241,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @should return all object matching the search query and resource
      * @should return empty list when no object match the search query and resource
      */
-    public List<Searchable> getObjects(final List<Filter> filters, final Resource resource) throws IOException {
+    public List<Searchable> getObjects(final List<Filter> filters, final Resource resource) throws Exception {
         BooleanQuery booleanQuery = null;
         if (!CollectionUtil.isEmpty(filters)) {
             booleanQuery = new BooleanQuery();
@@ -233,7 +263,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @return list of all object with matching <code>searchString</code> and <code>clazz</code> or empty list
      */
     @Override
-    public <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws ParseException, IOException {
+    public <T> List<T> getObjects(final String searchString, final Class<T> clazz) throws Exception {
         return indexer.getObjects(searchString, clazz);
     }
 
@@ -248,7 +278,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      */
     @Override
     public List<Searchable> getObjects(final String searchString, final Resource resource)
-            throws ParseException, IOException {
+            throws Exception {
         return indexer.getObjects(searchString, resource);
     }
 
@@ -265,7 +295,7 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @param resource the resource object which will describe how to index the json resource to lucene.
      */
     @Override
-    public void deleteObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+    public void deleteObjects(final List<Searchable> objects, final Resource resource) throws Exception {
         indexer.deleteObjects(objects, resource);
     }
 
@@ -285,8 +315,9 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @param resource the resource object which will describe how to index the json resource to lucene.
      */
     @Override
-    public void createObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+    public void createObjects(final List<Searchable> objects, final Resource resource) throws Exception {
         indexer.createObjects(objects, resource);
+
     }
 
     /**
@@ -300,7 +331,8 @@ public class RestAssuredServiceImpl implements RestAssuredService {
      * @param resource the resource object which will describe how to index the json resource to lucene.
      */
     @Override
-    public void updateObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+    public void updateObjects(final List<Searchable> objects, final Resource resource) throws Exception {
         indexer.updateObjects(objects, resource);
+
     }
 }

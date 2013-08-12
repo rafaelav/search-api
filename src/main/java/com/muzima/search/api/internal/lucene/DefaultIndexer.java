@@ -73,6 +73,8 @@ public class DefaultIndexer implements Indexer {
     @Inject
     private Map<String, Resource> resourceRegistry;
 
+
+
     private final QueryParser parser;
 
     private static final String DEFAULT_FIELD_JSON = "_json";
@@ -103,7 +105,7 @@ public class DefaultIndexer implements Indexer {
      * Private Getter and Setter section **
      */
 
-    private IndexWriter getIndexWriter() throws IOException {
+    private IndexWriter getIndexWriter() throws Exception {
         if (indexWriter == null) {
             indexWriter = writerProvider.get();
         }
@@ -114,14 +116,12 @@ public class DefaultIndexer implements Indexer {
         this.indexWriter = indexWriter;
     }
 
-    private IndexSearcher getIndexSearcher() throws IOException {
-        try {
+    private IndexSearcher getIndexSearcher() throws Exception {
+
             if (indexSearcher == null) {
                 indexSearcher = searcherProvider.get();
             }
-        } catch (IOException e) {
-            // silently ignoring this exception.
-        }
+
         return indexSearcher;
     }
 
@@ -140,7 +140,7 @@ public class DefaultIndexer implements Indexer {
      * @throws IOException when the operation encounter errors.
      */
     @Override
-    public void commit() throws IOException {
+    public void commit() throws Exception {
         if (getIndexWriter() != null) {
             getIndexWriter().commit();
             getIndexWriter().close();
@@ -235,7 +235,7 @@ public class DefaultIndexer implements Indexer {
      * @return objects with similar information with the query.
      * @throws IOException when the search encounter error.
      */
-    private List<Document> findDocuments(final Query query) throws IOException {
+    private List<Document> findDocuments(final Query query) throws Exception {
         List<Document> documents = new ArrayList<Document>();
         IndexSearcher searcher = getIndexSearcher();
         if (searcher != null) {
@@ -302,8 +302,7 @@ public class DefaultIndexer implements Indexer {
      * @throws ParseException when the json can't be used to create a query to identify the correct lucene index.
      * @throws IOException    when other error happens during the deletion process.
      */
-    private void deleteObject(final Object jsonObject, final Resource resource, final IndexWriter indexWriter)
-            throws IOException {
+    private void deleteObject(final Object jsonObject, final Resource resource, final IndexWriter indexWriter) throws Exception {
         BooleanQuery booleanQuery = new BooleanQuery();
         booleanQuery.add(createResourceQuery(resource), BooleanClause.Occur.MUST);
         booleanQuery.add(createObjectQuery(jsonObject, resource.getSearchableFields()), BooleanClause.Occur.MUST);
@@ -331,8 +330,7 @@ public class DefaultIndexer implements Indexer {
      * @throws ParseException when the json can't be used to create a query to identify the correct lucene index.
      * @throws IOException    when other error happens during the deletion process.
      */
-    private void updateObject(final Object jsonObject, final Resource resource, final IndexWriter indexWriter)
-            throws IOException {
+    private void updateObject(final Object jsonObject, final Resource resource, final IndexWriter indexWriter) throws Exception {
         // search for the same object, if they exists, delete them :)
         deleteObject(jsonObject, resource, indexWriter);
         // write the new object
@@ -354,11 +352,13 @@ public class DefaultIndexer implements Indexer {
         } else if (jsonObject instanceof JSONObject) {
             searchables.add(resource.deserialize(jsonObject.toString()));
         }
+
         return searchables;
     }
 
     @Override
-    public <T> T getObject(final String key, final Class<T> clazz) throws IOException {
+    public <T> T getObject(final String key, final Class<T> clazz) throws Exception {
+
         T object = null;
 
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -388,7 +388,7 @@ public class DefaultIndexer implements Indexer {
     }
 
     @Override
-    public Searchable getObject(final String key, final Resource resource) throws IOException {
+    public Searchable getObject(final String key, final Resource resource) throws Exception {
         Searchable object = null;
 
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -416,7 +416,7 @@ public class DefaultIndexer implements Indexer {
     }
 
     @Override
-    public <T> List<T> getObjects(final Query query, final Class<T> clazz) throws IOException {
+    public <T> List<T> getObjects(final Query query, final Class<T> clazz) throws Exception {
         List<T> objects = new ArrayList<T>();
 
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -440,7 +440,7 @@ public class DefaultIndexer implements Indexer {
     }
 
     @Override
-    public List<Searchable> getObjects(final Query query, final Resource resource) throws IOException {
+    public List<Searchable> getObjects(final Query query, final Resource resource) throws Exception {
         List<Searchable> objects = new ArrayList<Searchable>();
 
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -463,7 +463,7 @@ public class DefaultIndexer implements Indexer {
 
     @Override
     public <T> List<T> getObjects(final String searchString, final Class<T> clazz)
-            throws ParseException, IOException {
+            throws Exception {
         List<T> objects = new ArrayList<T>();
 
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -489,7 +489,7 @@ public class DefaultIndexer implements Indexer {
 
     @Override
     public List<Searchable> getObjects(final String searchString, final Resource resource)
-            throws ParseException, IOException {
+            throws Exception {
         List<Searchable> objects = new ArrayList<Searchable>();
 
         // TODO: use checksum here.
@@ -517,7 +517,7 @@ public class DefaultIndexer implements Indexer {
     }
 
     @Override
-    public void deleteObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+    public void deleteObjects(final List<Searchable> objects, final Resource resource) throws Exception {
         for (Searchable object : objects) {
             String jsonString = resource.serialize(object);
             Object jsonObject = JsonPath.read(jsonString, "$");
@@ -527,7 +527,7 @@ public class DefaultIndexer implements Indexer {
     }
 
     @Override
-    public void createObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+    public void createObjects(final List<Searchable> objects, final Resource resource) throws Exception {
         for (Searchable object : objects) {
             String jsonString = resource.serialize(object);
             Object jsonObject = JsonPath.read(jsonString, "$");
@@ -537,7 +537,7 @@ public class DefaultIndexer implements Indexer {
     }
 
     @Override
-    public void updateObjects(final List<Searchable> objects, final Resource resource) throws IOException {
+    public void updateObjects(final List<Searchable> objects, final Resource resource) throws Exception {
         for (Searchable object : objects) {
             String jsonString = resource.serialize(object);
             Object jsonObject = JsonPath.read(jsonString, "$");

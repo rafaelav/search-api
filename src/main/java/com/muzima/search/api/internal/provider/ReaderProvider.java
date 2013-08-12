@@ -32,7 +32,7 @@ public class ReaderProvider implements SearchProvider<IndexReader> {
     }
 
     @Override
-    public IndexReader get() throws IOException {
+    public IndexReader get() throws Exception {
         Directory directory = directoryProvider.get();
         return IndexReader.open(directory);
     }
