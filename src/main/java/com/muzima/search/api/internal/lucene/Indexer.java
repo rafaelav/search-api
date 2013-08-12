@@ -29,6 +29,7 @@ public interface Indexer {
 
     List<Searchable> loadObjects(final Resource resource, final InputStream inputStream) throws Exception;
 
+
     <T> T getObject(final String key, final Class<T> clazz) throws Exception;
 
     Searchable getObject(final String key, final Resource resource) throws Exception;

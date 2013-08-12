@@ -75,6 +75,8 @@ public class DefaultIndexer implements Indexer {
 
 
 
+
+
     private final QueryParser parser;
 
     private static final String DEFAULT_FIELD_JSON = "_json";
@@ -302,6 +304,7 @@ public class DefaultIndexer implements Indexer {
      * @throws ParseException when the json can't be used to create a query to identify the correct lucene index.
      * @throws IOException    when other error happens during the deletion process.
      */
+
     private void deleteObject(final Object jsonObject, final Resource resource, final IndexWriter indexWriter) throws Exception {
         BooleanQuery booleanQuery = new BooleanQuery();
         booleanQuery.add(createResourceQuery(resource), BooleanClause.Occur.MUST);
@@ -330,6 +333,7 @@ public class DefaultIndexer implements Indexer {
      * @throws ParseException when the json can't be used to create a query to identify the correct lucene index.
      * @throws IOException    when other error happens during the deletion process.
      */
+
     private void updateObject(final Object jsonObject, final Resource resource, final IndexWriter indexWriter) throws Exception {
         // search for the same object, if they exists, delete them :)
         deleteObject(jsonObject, resource, indexWriter);
@@ -341,6 +345,7 @@ public class DefaultIndexer implements Indexer {
     public List<Searchable> loadObjects(final Resource resource, final InputStream inputStream)
             throws IOException {
         List<Searchable> searchables = new ArrayList<Searchable>();
+
         InputStreamReader reader = new InputStreamReader(inputStream);
         String json = StreamUtil.readAsString(reader);
         Object jsonObject = JsonPath.read(json, resource.getRootNode());
@@ -358,7 +363,6 @@ public class DefaultIndexer implements Indexer {
 
     @Override
     public <T> T getObject(final String key, final Class<T> clazz) throws Exception {
-
         T object = null;
 
         BooleanQuery booleanQuery = new BooleanQuery();

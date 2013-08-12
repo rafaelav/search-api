@@ -168,7 +168,9 @@ public interface RestAssuredService {
      * @should remove an object from the internal index system
      */
 
+
     void deleteObjects(final List<Searchable> objects, final Resource resource) throws Exception;
+
 
     /**
      * Create instances of object in the local repository.
@@ -181,7 +183,6 @@ public interface RestAssuredService {
      */
 
     void createObjects(final List<Searchable> objects, Resource resource) throws Exception;
-
 
     /**
      * Update instances of object in the local repository.

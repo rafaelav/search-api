@@ -39,6 +39,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openmrs.Cohort;
+import android.content.Context;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,36 +162,10 @@ public class RestAssuredServiceTest {
             List<Searchable> searchables = service.loadObjects("00006b1f-8bfb-4769-b443-ecf7eb908ab1", resource);
             for (Searchable searchable : searchables) {
                 logger.info("Patient uuid: {}", ((Patient)searchable).getUuid());
-//=======
-//
-//        Resource resource = null;
-//
-//        resource = Context.getResource("Cohort Resource");
-//        Assert.assertNotNull(resource);
-//        service.loadObjects(StringUtil.EMPTY, resource);
-//        List<Cohort> cohorts = service.getObjects(StringUtil.EMPTY, Cohort.class);
-//        for (Cohort cohort : cohorts) {
-//            resource = Context.getResource("Cohort Member Resource");
-//            Assert.assertNotNull(resource);
-//            service.loadObjects(cohort.getUuid(), resource);
-//            List<Patient> patients = service.getObjects(StringUtil.EMPTY, Patient.class);
-//            for (Patient patient : patients) {
-//                resource = Context.getResource("Observation Resource");
-//                Assert.assertNotNull(resource);
-//                service.loadObjects(patient.getUuid(), resource);
-//>>>>>>> cherry-picking:src/test/java/com/mclinic/search/api/RestAssuredServiceTest.java
             }
         } catch (IOException e) {
             logger.error("Exception thrown while trying to connect to server through proxy!", e);
         }
-//<<<<<<< HEAD:src/test/java/com/muzima/search/api/RestAssuredServiceTest.java
-//=======
-//
-//        List<Patient> patients = service.getObjects(StringUtil.EMPTY, Patient.class);
-//        Assert.assertNotNull(patients);
-//        Assert.assertTrue(patients.size() > 0);
-//
-//>>>>>>> cherry-picking:src/test/java/com/mclinic/search/api/RestAssuredServiceTest.java
     }
 
     /**
